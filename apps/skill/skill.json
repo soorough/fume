@@ -1,0 +1,58 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "name": "Fume",
+      "description": "Talk to Fume, your AI room companion.",
+      "category": "COMMUNICATION",
+      "distributionCountries": ["US"],
+      "locales": {
+        "en-US": {
+          "name": "Fume",
+          "summary": "A persistent AI companion for your room, spoken like a friend.",
+          "description": "Open Fume and keep talking. Fume remembers you across sessions.",
+          "examplePhrases": [
+            "Alexa, open Fume",
+            "Alexa, talk to Fume"
+          ],
+          "keywords": [
+            "companion",
+            "assistant",
+            "memory",
+            "conversation"
+          ]
+        }
+      }
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:us-east-1:CHANGE_ME:function:fume-skill"
+        },
+        "interfaces": []
+      }
+    },
+    "manifestVersion": "1.0",
+    "permissions": [],
+    "accountLinking": {
+      "authorizationUrl": "https://www.amazon.com/ap/oa?scope=profile",
+      "accessTokenUri": "https://api.amazon.com/auth/o2/token",
+      "accessTokenType": "ACCESS_TOKEN",
+      "authorizationGrantType": "AUTH_CODE",
+      "domains": ["api.amazon.com", "amazon.com"],
+      "clientId": "__LWA_CLIENT_ID__",
+      "clientSecret": "__LWA_CLIENT_SECRET__",
+      "scopes": ["profile"],
+      "skipOnEnablement": false
+    },
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": true,
+      "showsPersonalInfo": false,
+      "isExportCompliant": false,
+      "containsAds": false,
+      "isChildDirected": false,
+      "usesPII": false,
+      "testInstructions": "(not applicable)"
+    }
+  }
+}

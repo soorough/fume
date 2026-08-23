@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: fume-postgres
+    environment:
+      POSTGRES_USER: fume
+      POSTGRES_PASSWORD: fume
+      POSTGRES_DB: fume
+    ports:
+      - "5433:5432"
+    volumes:
+      - fume-pgdata:/var/lib/postgresql/data
+
+volumes:
+  fume-pgdata:

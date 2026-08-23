@@ -1,0 +1,54 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "fume",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent"
+        },
+        {
+          "name": "AMAZON.CancelIntent"
+        },
+        {
+          "name": "AMAZON.StopIntent"
+        },
+        {
+          "name": "AMAZON.HelpIntent"
+        },
+        {
+          "name": "RememberIntent",
+          "samples": [
+            "remember this",
+            "remember that",
+            "remember what i just said"
+          ]
+        },
+        {
+          "name": "ForgetIntent",
+          "samples": [
+            "forget that",
+            "forget what i just said",
+            "forget everything about {what}",
+            "forget {what}",
+            "do not remember that"
+          ],
+          "slots": [
+            {
+              "name": "what",
+              "type": "AMAZON.SearchQuery"
+            }
+          ]
+        },
+        {
+          "name": "RecallIntent",
+          "samples": [
+            "what do you remember about me",
+            "what do you know about me",
+            "show me everything you remember about me",
+            "what do you have on me"
+          ]
+        }
+      ]
+    }
+  }
+}

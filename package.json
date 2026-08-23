@@ -1,0 +1,17 @@
+{
+  "name": "fume",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A persistent AI companion that lives in your environment. Never make Alexa the product - make the Companion the product.",
+  "workspaces": [
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/api",
+    "db:push": "npm run db:push -w apps/api",
+    "typecheck": "npm run typecheck -w apps/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
