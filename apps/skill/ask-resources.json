@@ -6,7 +6,7 @@
         "src": "skill-package"
       },
       "code": {
-        "us-east-1": {
+        "NA": {
           "src": "lambda"
         }
       },
