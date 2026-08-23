@@ -13,8 +13,8 @@
           "summary": "A persistent AI companion for your room, spoken like a friend.",
           "description": "Open Fume and keep talking. Fume remembers you across sessions.",
           "examplePhrases": [
-            "Alexa, open fume companion",
-            "Alexa, talk to fume companion"
+            "Alexa, open fume ai",
+            "Alexa, talk to fume ai"
           ],
           "keywords": [
             "companion",

@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "fume companion",
+      "invocationName": "fume ai",
       "intents": [
         {
           "name": "AMAZON.FallbackIntent"
