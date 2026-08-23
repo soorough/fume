@@ -46,7 +46,12 @@ export async function authenticate(req: FastifyRequest): Promise<string> {
   const header = req.headers.authorization ?? '';
   if (header.startsWith('Bearer ')) {
     const token = header.slice(7).trim();
-    if (token) return upsertUser(await amazonUserIdFromToken(token));
+    if (token) {
+      if (env.NODE_ENV !== 'production' && token === env.DEV_AUTH_KEY) {
+        return upsertUser('dev-user');
+      }
+      return upsertUser(await amazonUserIdFromToken(token));
+    }
   }
   const devKey = req.headers['x-fume-dev-key'];
   if (typeof devKey === 'string' && devKey === env.DEV_AUTH_KEY) {

@@ -1,13 +1,17 @@
 import Alexa from 'ask-sdk-core';
 
-const API_URL = (process.env.FUME_API_URL || '').replace(/\/$/, '');
 const REQUEST_TIMEOUT_MS = 12000;
+
+function fumeApiUrl() {
+  return (process.env.FUME_API_URL || '').replace(/\/$/, '');
+}
 
 function accessTokenOf(input) {
   return input.context?.System?.user?.accessToken ?? '';
 }
 
 async function fumeApi(path, token, body) {
+  const API_URL = fumeApiUrl();
   if (!API_URL) throw new Error('FUME_API_URL is not set on the lambda');
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
@@ -15,7 +19,7 @@ async function fumeApi(path, token, body) {
       'content-type': 'application/json',
       authorization: `Bearer ${token}`,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(body) : '{}',
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!res.ok) {
