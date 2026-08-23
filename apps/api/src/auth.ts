@@ -3,6 +3,7 @@ import type { FastifyRequest } from 'fastify';
 import { env } from './config';
 import { db } from './db/client';
 import { users } from './db/schema';
+import { verifyToken } from './oauth';
 
 const profileCache = new Map<
   string,
@@ -47,6 +48,8 @@ export async function authenticate(req: FastifyRequest): Promise<string> {
   if (header.startsWith('Bearer ')) {
     const token = header.slice(7).trim();
     if (token) {
+      const jwt = verifyToken(token);
+      if (jwt) return upsertUser(jwt.sub);
       if (env.NODE_ENV !== 'production' && token === env.DEV_AUTH_KEY) {
         return upsertUser('dev-user');
       }

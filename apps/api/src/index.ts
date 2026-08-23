@@ -1,9 +1,11 @@
 import Fastify from 'fastify';
+import formbody from '@fastify/formbody';
 import './types';
 
 const app = Fastify({ logger: true });
 
 app.decorateRequest('userId', null);
+await app.register(formbody);
 
 const { registerRoutes } = await import('./routes');
 await registerRoutes(app);

@@ -1,7 +1,9 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { authenticate } from './auth';
+import { env } from './config';
 import * as memory from './memory';
+import * as oauth from './oauth';
 import { buildSystemPrompt, memoryBlock } from './prompt';
 import { resolveProvider } from './providers/model';
 import * as sessions from './sessions';
@@ -30,6 +32,50 @@ const forgetSchema = z.object({
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   app.get('/v1/health', async () => ({ ok: true }));
+
+  app.get('/auth/authorize', async (req, reply) => {
+    const q = req.query as Record<string, string | undefined>;
+    if (q.response_type !== 'code') {
+      return reply.status(400).send('invalid authorize request');
+    }
+    const redirectUri = q.redirect_uri ?? 'https://pitangui.amazon.com/api/skill/link/M2DIFADMJJC323';
+    const code = await oauth.issueCode();
+    try {
+      const url = new URL(redirectUri);
+      url.searchParams.set('code', code);
+      if (q.state) url.searchParams.set('state', q.state);
+      return reply.redirect(url.toString());
+    } catch {
+      return reply.status(400).send('invalid redirect_uri');
+    }
+  });
+
+  app.post('/auth/token', async (req, reply) => {
+    const body = (req.body ?? {}) as Record<string, string | undefined>;
+    let clientId = body.client_id;
+    let clientSecret = body.client_secret;
+    const auth = req.headers.authorization ?? '';
+    if (auth.startsWith('Basic ')) {
+      const [user, pass] = Buffer.from(auth.slice(6), 'base64')
+        .toString()
+        .split(':');
+      clientId = user;
+      clientSecret = pass;
+    }
+    if (
+      clientId !== env.OAUTH_CLIENT_ID ||
+      clientSecret !== env.OAUTH_CLIENT_SECRET
+    ) {
+      return reply.status(401).send({ error: 'invalid_client' });
+    }
+    if (body.grant_type !== 'authorization_code') {
+      return reply.status(400).send({ error: 'unsupported_grant_type' });
+    }
+    if (!body.code || !oauth.consumeCode(body.code)) {
+      return reply.status(400).send({ error: 'invalid_grant' });
+    }
+    return reply.send(oauth.issueToken(oauth.ownerId()));
+  });
 
   app.post(
     '/v1/open',

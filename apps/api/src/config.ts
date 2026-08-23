@@ -24,6 +24,9 @@ const envSchema = z.object({
   MEMORY_RETRIEVE_LIMIT: z.coerce.number().default(8),
   CONTEXT_WINDOW_LAST_N: z.coerce.number().default(20),
   SUMMARY_ON_END: boolFromEnv.default(false),
+  OAUTH_CLIENT_ID: z.string().default('fume-skill'),
+  OAUTH_CLIENT_SECRET: z.string().default('fume-skill-secret-change-me'),
+  OAUTH_OWNER: z.string().default('fume-owner'),
 });
 
 const parsed = envSchema.safeParse(process.env);

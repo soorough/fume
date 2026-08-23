@@ -53,6 +53,20 @@ matching active memories. Returns `{suppressed: n}`.
 ### `POST /v1/memory/recall`
 Returns the user's active memories, importance-descending, capped at 50.
 
+## OAuth (self-hosted account linking)
+
+The backend doubles as the OAuth provider so the Alexa skill can link accounts
+without LWA (whose standalone profiles reject skill scopes — see
+[field-notes.md](field-notes.md)).
+
+- `GET /auth/authorize` — `response_type=code` required; client_id/redirect are
+  lenient (echoes any redirect, defaults to the Alexa pitangui callback).
+- `POST /auth/token` — Basic auth (`OAUTH_CLIENT_ID`/`OAUTH_CLIENT_SECRET`) or
+  body credentials; `grant_type=authorization_code` → signed JWT
+  (HS256, `exp` 1h).
+- The Bearer JWT is accepted by `/v1/*` auth alongside LWA tokens and the dev
+  key.
+
 ## Errors
 
 `400` invalid body / nothing to operate on · `401` auth failed · `500` provider
