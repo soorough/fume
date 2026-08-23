@@ -1,0 +1,23 @@
+{
+  "askcliResourcesVersion": "2020-03-31",
+  "profiles": {
+    "default": {
+      "skillMetadata": {
+        "src": "skill-package"
+      },
+      "code": {
+        "us-east-1": {
+          "src": "lambda"
+        }
+      },
+      "skillInfrastructure": {
+        "type": "@ask-cli/lambda-deployer",
+        "userConfig": {
+          "functionName": "fume-skill",
+          "runtime": "nodejs20.x",
+          "handler": "index.handler"
+        }
+      }
+    }
+  }
+}
