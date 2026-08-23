@@ -8,3 +8,6 @@ build/
 .DS_Store
 .ask/
 apps/skill/lambda/node_modules/
+
+# private product spec (kept out of the open-source repo)
+docs/spec.md

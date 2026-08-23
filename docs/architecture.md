@@ -34,7 +34,7 @@ Alexa session END  ≠  conversation END. Backend owns conversation state.
 - **`/v1/open` does the welcome-back.** Optional `SUMMARY_ON_END` runs a cheap
   summarizer when a conversation closes, feeding "Welcome back. We were talking
   about X. Want to continue?" — the feature that makes Alexa's session limits
-  survivable (SPEC §25).
+  survivable.
 
 ## Known M1 limits
 

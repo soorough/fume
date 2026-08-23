@@ -1,67 +1,112 @@
 # Fume
 
 A persistent AI companion that lives in your environment and can be spoken to
-naturally. Voice-first, memory-first, model-agnostic, hardware-independent.
+naturally. Voice-first, memory-first, model-agnostic.
 
-> Never make Alexa the product. Make the Companion the product. (SPEC §32)
+No phone. No laptop. No app. No repeated invocation. Just a companion that
+remembers you.
 
-Product spec: [docs/spec.md](docs/spec.md) — architecture: [docs/architecture.md](docs/architecture.md)
+`"Fume."` → the device wakes → you keep talking.
 
-## Layout
+## Why Fume
+
+Alexa, Google Home, Siri are *search boxes with speakers*: command → response →
+end. Fume is a **persistent intelligence**:
+
+- **Memory first** — durable facts survive across sessions, and you own them.
+  You can ask *"what do you remember about me?"*, *"forget everything about
+  Japan"*, and it listens.
+- **Alexa is only the first microphone** — the brain lives in a backend that is
+  hardware-independent. When the companion gets its own hardware, the swap is
+  an interface change, not a rewrite.
+- **Model-agnostic** — a provider interface behind a router. Ships with DeepSeek
+  and a mock provider; bring your own.
+- **Conversation over commands** — the backend owns conversation state and
+  short/long-term memory, so an ended Alexa session is not an ended
+  conversation.
+
+## Architecture
 
 ```
-apps/
-  api/    Fastify + Drizzle + Postgres backend (companion brain)
-  skill/  Alexa skill (ASDK v2 lambda) + interaction model + account linking
-docs/
-  spec.md           the full product spec
-  architecture.md   M1 decisions
+Alexa (mic + speaker only)
+   ↓  access token, utterance
+Alexa Skill (thin lambda)          — no keys, no logic
+   ↓  POST /v1/*  Bearer <LWA token>
+Companion API (Fastify)
+   ├── Session Manager   — one active conversation per user, resumes
+   ├── Memory Engine     — extraction, retrieval, tombstones
+   ├── Model Router      — mock | deepseek (interface stays)
+   └── Postgres          — conversations, messages, memories
 ```
 
-## Quick start (backend, no Amazon account needed)
+```
+Alexa session END  ≠  conversation END
+```
+
+## Quick start
 
 ```bash
 npm install
-docker compose up -d                      # postgres 16 + pgvector on :5433
-npm run db:push                           # create schema
-npm run dev                               # http://localhost:3000
+docker compose up -d            # postgres 16 + pgvector on :5433
+npm run db:push                 # create schema
+npm run dev                     # http://localhost:3000
 ```
 
-Test the full loop with the mock provider + dev auth key:
+Test the whole loop with zero external services (mock provider + dev key):
 
 ```bash
 curl -s http://localhost:3000/v1/health
 
 curl -s -X POST http://localhost:3000/v1/respond \
-  -H 'content-type: application/json' \
-  -H 'x-fume-dev-key: dev' \
-  -d '{"utterance":"I am building an AI companion with Alexa"}'
+  -H 'content-type: application/json' -H 'x-fume-dev-key: dev' \
+  -d '{"utterance":"I like chai tea and I am building a companion"}'
 
-curl -s -X POST http://localhost:3000/v1/memory/pin -H 'x-fume-dev-key: dev'
 curl -s -X POST http://localhost:3000/v1/memory/recall -H 'x-fume-dev-key: dev'
 ```
 
-## Config
+To use the real model: `DEFAULT_PROVIDER=deepseek` + `DEEPSEEK_API_KEY` in
+`apps/api/.env` (see `apps/api/.env.example`).
 
-Copy [apps/api/.env.example](apps/api/.env.example) to `apps/api/.env` to override.
-Defaults: mock model provider (set `DEFAULT_PROVIDER=deepseek` + key for the real one),
-`x-fume-dev-key: dev` for local auth, LWA profile endpoint for real Alexa tokens.
+## Repo layout
 
-## Alexa skill
+```
+apps/
+  api/       Fastify + Drizzle + Postgres companion backend
+  skill/     Alexa skill (ASK SDK v2 lambda) — thin voice proxy
+docs/        API, memory, deployment, architecture docs
+```
 
-1. Create a Login with Amazon (LWA) security profile at developer.amazon.com →
-2. Fill `__LWA_CLIENT_ID__` / `__LWA_CLIENT_SECRET__` in
-   [apps/skill/skill.json](apps/skill/skill.json)
-3. Deploy the lambda: `npm install --prefix apps/skill/lambda`, zip contents,
-   or `ask deploy` from `apps/skill`
-4. Set the `FUME_API_URL` env var in the lambda to the public backend URL
-   (e.g. ngrok tunnel or a deployed API)
+## Documentation
 
-The skill uses LWA as the OAuth IdP (account linking): the access token Amazon
-passes in each request is forwarded to the API, which resolves it to a user via
-`https://api.amazon.com/user/profile`. No keys in the skill.
+Start at [docs/README.md](docs/README.md) — API reference, memory design,
+Alexa skill internals, and deployment (Railway + AWS Lambda).
 
-## Works towards
+## Roadmap
 
-M1 ✓ : skill + backend + conversation DB + session manager + memory engine +
-DeepSeek-compatible provider + basic auth (see docs/architecture.md)
+- **M1 (built)** — Alexa skill, backend API, conversation DB, session manager,
+  memory engine (auto-extraction + explicit commands), DeepSeek provider, LWA
+  auth, keep-alive skill sessions
+- **P2** — semantic memory search (pgvector pre-provisioned), compaction of
+  long conversations, personality modes, MCP tools, proactive features, memory
+  dashboard
+- **P3** — dedicated hardware: wake word, far-field mic array, own voice
+  pipeline; Alexa disappears, the rest of the system stays
+
+## Security & privacy
+
+- API keys live only in the backend. The skill never holds secrets.
+- Memory is user-owned: `recall`, `forget`, `pin` are first-class, and
+  forgetting is tombstone-guarded so deleted facts stay deleted.
+- Env-dependent: when using a remote model provider, conversation context is
+  sent there per request. Handle with your provider's retention policy in mind.
+
+See [SECURITY.md](SECURITY.md).
+
+## Contributing
+
+Issues, PRs, ideas — see [CONTRIBUTING.md](CONTRIBUTING.md). Please don't
+commit real LM/LWA/AWS secrets.
+
+## License
+
+[MIT](LICENSE)
