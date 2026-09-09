@@ -48,6 +48,17 @@ async function upsertUser(amazonUserId: string): Promise<string> {
 // who is linking, so every token it mints carries the same subject — which meant
 // every linked user shared one memory store. Prefer Alexa's id when the skill
 // forwards it, and fall back to the token subject only when it is absent.
+function looksLikeOwnToken(token: string): boolean {
+  const parts = token.split('.');
+  if (parts.length !== 3) return false;
+  try {
+    const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+    return header.alg === 'HS256' && header.typ === 'JWT';
+  } catch {
+    return false;
+  }
+}
+
 function alexaUserId(req: FastifyRequest): string | undefined {
   const id = req.headers['x-fume-alexa-user-id'];
   return typeof id === 'string' && id.startsWith('amzn1.ask.account.')
@@ -65,6 +76,11 @@ export async function authenticate(req: FastifyRequest): Promise<string> {
       if (env.NODE_ENV !== 'production' && token === env.DEV_AUTH_KEY) {
         return upsertUser('dev-user');
       }
+      // Only hand opaque tokens to LWA. One shaped like our own JWT that failed
+      // verification is expired, forged, or a refresh token being spent as a
+      // bearer credential — all of which are 'unauthorized', not a reason to
+      // ask Amazon about a token Amazon never issued.
+      if (looksLikeOwnToken(token)) throw new Error('unauthorized');
       return upsertUser(await amazonUserIdFromToken(token));
     }
   }
