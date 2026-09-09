@@ -70,7 +70,7 @@ HTTPS endpoints for new skills), packaging script included
 Once deployed:
 
 ```
-Alexa, open Fume.
+Alexa, open fume bot.
 I like chai tea and I am building a companion named Fume.
 What do you remember about me?
 Remember this.

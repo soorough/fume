@@ -49,8 +49,11 @@ Painful-but-usable knowledge from getting Fume to an Echo end-to-end.
 
 ## Invocation & store
 
-- 1-word invocation = brand proof required. "fume ai" passes.
-- Example-phrase validation: full sentence, period: `Alexa, open fume ai.`
+- 1-word invocation = brand proof required; 2 words avoids it. "fume bot" passes.
+- Avoid 2-letter initialisms ("fume ai" → ASR heard "fumea a.i."), and avoid
+  "talk to X" in example phrases — it collides with Alexa Calling ("say the
+  name as it appears in your contacts").
+- Example-phrase validation: full sentence, period: `Alexa, open fume bot.`
 - "1 Fix Required: Confirmation for 'Export compliance' is missing" — the
   checkbox lives in Distribution → Privacy & Compliance, not the manifest.
 - Dev-stage skills are invisible to devices until beta; beta submission requires

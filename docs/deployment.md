@@ -118,8 +118,8 @@ works. The authorize endpoint intentionally accepts any `client_id`.
 
 ## 5. Store / beta prerequisites
 
-- Invocation name: 2+ words or brand proof — use "fume ai".
-- Example phrases use full sentence + period: `Alexa, open fume ai.`
+- Invocation name: 2+ words or brand proof — use "fume bot".
+- Example phrases use full sentence + period: `Alexa, open fume bot.`
 - Privacy & Compliance: purchases=No, shopping=No, personal info=Yes,
   targeting children=No, ads=No; **check Export Compliance cert box**;
   testing instructions mention the no-credential OAuth click-through.
