@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@fastify/formbody": "^9.0.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.44.2",

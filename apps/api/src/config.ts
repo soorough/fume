@@ -13,8 +13,10 @@ const envSchema = z.object({
     .string()
     .default('postgres://fume:fume@localhost:5433/fume'),
   DEV_AUTH_KEY: z.string().default('dev'),
-  DEFAULT_PROVIDER: z.enum(['mock', 'deepseek']).default('mock'),
+  DEFAULT_PROVIDER: z.enum(['mock', 'deepseek', 'claude']).default('mock'),
   DEEPSEEK_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_MODEL: z.string().default('claude-opus-5'),
   DEEPSEEK_BASE_URL: z.string().default('https://api.deepseek.com'),
   DEEPSEEK_MODEL: z.string().default('deepseek-chat'),
   LWA_PROFILE_URL: z.string().default('https://api.amazon.com/user/profile'),

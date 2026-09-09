@@ -1,6 +1,9 @@
 import Alexa from 'ask-sdk-core';
 
-const REQUEST_TIMEOUT_MS = 12000;
+// Alexa abandons the skill response at roughly 8s. Waiting 12s guaranteed
+// the user heard nothing at all on a slow turn; failing at 6s leaves room to
+// speak an apology instead.
+const REQUEST_TIMEOUT_MS = 6000;
 
 function fumeApiUrl() {
   return (process.env.FUME_API_URL || '').replace(/\/$/, '');
