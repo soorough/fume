@@ -17,8 +17,15 @@ function unauthorized(): Error {
 const requireAuth = async (req: FastifyRequest): Promise<void> => {
   try {
     req.userId = await authenticate(req);
-  } catch {
-    throw unauthorized();
+  } catch (err) {
+    // Only a genuine credential failure is a 401. Anything else (database
+    // down, missing schema, LWA unreachable) is a server fault, and reporting
+    // it as 401 makes an outage indistinguishable from a bad token.
+    req.log.error({ err }, 'authenticate failed');
+    if (err instanceof Error && err.message === 'unauthorized') {
+      throw unauthorized();
+    }
+    throw err;
   }
 };
 
