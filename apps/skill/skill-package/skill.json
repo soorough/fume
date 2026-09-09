@@ -4,11 +4,69 @@
       "name": "Fume",
       "description": "Talk to Fume, your AI room companion.",
       "category": "COMMUNICATION",
-      "distributionCountries": [
-        "US"
-      ],
+      "distributionCountries": [],
       "locales": {
         "en-US": {
+          "name": "Fume",
+          "summary": "A persistent AI companion for your room, spoken like a friend.",
+          "description": "Open Fume and keep talking. Fume remembers you across sessions.",
+          "examplePhrases": [
+            "Alexa, open fume bot.",
+            "Alexa, start fume bot."
+          ],
+          "keywords": [
+            "companion",
+            "assistant",
+            "memory",
+            "conversation"
+          ]
+        },
+        "en-GB": {
+          "name": "Fume",
+          "summary": "A persistent AI companion for your room, spoken like a friend.",
+          "description": "Open Fume and keep talking. Fume remembers you across sessions.",
+          "examplePhrases": [
+            "Alexa, open fume bot.",
+            "Alexa, start fume bot."
+          ],
+          "keywords": [
+            "companion",
+            "assistant",
+            "memory",
+            "conversation"
+          ]
+        },
+        "en-CA": {
+          "name": "Fume",
+          "summary": "A persistent AI companion for your room, spoken like a friend.",
+          "description": "Open Fume and keep talking. Fume remembers you across sessions.",
+          "examplePhrases": [
+            "Alexa, open fume bot.",
+            "Alexa, start fume bot."
+          ],
+          "keywords": [
+            "companion",
+            "assistant",
+            "memory",
+            "conversation"
+          ]
+        },
+        "en-IN": {
+          "name": "Fume",
+          "summary": "A persistent AI companion for your room, spoken like a friend.",
+          "description": "Open Fume and keep talking. Fume remembers you across sessions.",
+          "examplePhrases": [
+            "Alexa, open fume bot.",
+            "Alexa, start fume bot."
+          ],
+          "keywords": [
+            "companion",
+            "assistant",
+            "memory",
+            "conversation"
+          ]
+        },
+        "en-AU": {
           "name": "Fume",
           "summary": "A persistent AI companion for your room, spoken like a friend.",
           "description": "Open Fume and keep talking. Fume remembers you across sessions.",
@@ -46,8 +104,30 @@
       "allowsPurchases": false,
       "usesPersonalInfo": true,
       "isChildDirected": false,
-      "isExportCompliant": false,
-      "containsAds": false
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "en-US": {
+          "privacyPolicyUrl": "https://github.com/soorough/fume/blob/main/PRIVACY.md",
+          "termsOfUseUrl": "https://github.com/soorough/fume/blob/main/TERMS.md"
+        },
+        "en-GB": {
+          "privacyPolicyUrl": "https://github.com/soorough/fume/blob/main/PRIVACY.md",
+          "termsOfUseUrl": "https://github.com/soorough/fume/blob/main/TERMS.md"
+        },
+        "en-CA": {
+          "privacyPolicyUrl": "https://github.com/soorough/fume/blob/main/PRIVACY.md",
+          "termsOfUseUrl": "https://github.com/soorough/fume/blob/main/TERMS.md"
+        },
+        "en-IN": {
+          "privacyPolicyUrl": "https://github.com/soorough/fume/blob/main/PRIVACY.md",
+          "termsOfUseUrl": "https://github.com/soorough/fume/blob/main/TERMS.md"
+        },
+        "en-AU": {
+          "privacyPolicyUrl": "https://github.com/soorough/fume/blob/main/PRIVACY.md",
+          "termsOfUseUrl": "https://github.com/soorough/fume/blob/main/TERMS.md"
+        }
+      }
     }
   }
 }

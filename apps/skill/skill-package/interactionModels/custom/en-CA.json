@@ -1,0 +1,176 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "fume bot",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent"
+        },
+        {
+          "name": "AMAZON.CancelIntent"
+        },
+        {
+          "name": "AMAZON.StopIntent"
+        },
+        {
+          "name": "AMAZON.HelpIntent"
+        },
+        {
+          "name": "RememberIntent",
+          "samples": [
+            "remember this",
+            "remember that",
+            "remember what i just said"
+          ]
+        },
+        {
+          "name": "ForgetIntent",
+          "samples": [
+            "forget that",
+            "forget what i just said",
+            "forget everything about {what}",
+            "forget {what}",
+            "do not remember that"
+          ],
+          "slots": [
+            {
+              "name": "what",
+              "type": "AMAZON.SearchQuery"
+            }
+          ]
+        },
+        {
+          "name": "RecallIntent",
+          "samples": [
+            "what do you remember about me",
+            "what do you know about me",
+            "show me everything you remember about me",
+            "what do you have on me"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent"
+        },
+        {
+          "name": "ChatIntent",
+          "slots": [
+            {
+              "name": "text",
+              "type": "FumePhrase"
+            }
+          ],
+          "samples": [
+            "{text}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "FumePhrase",
+          "values": [
+            {
+              "name": {
+                "value": "i like chai tea"
+              }
+            },
+            {
+              "name": {
+                "value": "i had a long day"
+              }
+            },
+            {
+              "name": {
+                "value": "tell me something interesting"
+              }
+            },
+            {
+              "name": {
+                "value": "what do you think about that"
+              }
+            },
+            {
+              "name": {
+                "value": "i am building a companion"
+              }
+            },
+            {
+              "name": {
+                "value": "i feel tired today"
+              }
+            },
+            {
+              "name": {
+                "value": "my sister is visiting next week"
+              }
+            },
+            {
+              "name": {
+                "value": "i want to talk about work"
+              }
+            },
+            {
+              "name": {
+                "value": "that sounds good"
+              }
+            },
+            {
+              "name": {
+                "value": "i disagree with that"
+              }
+            },
+            {
+              "name": {
+                "value": "can you help me think through something"
+              }
+            },
+            {
+              "name": {
+                "value": "i am not sure"
+              }
+            },
+            {
+              "name": {
+                "value": "it was raining all morning"
+              }
+            },
+            {
+              "name": {
+                "value": "i finished the project"
+              }
+            },
+            {
+              "name": {
+                "value": "let us talk about music"
+              }
+            },
+            {
+              "name": {
+                "value": "i keep thinking about it"
+              }
+            },
+            {
+              "name": {
+                "value": "nothing much"
+              }
+            },
+            {
+              "name": {
+                "value": "i am happy today"
+              }
+            },
+            {
+              "name": {
+                "value": "that is funny"
+              }
+            },
+            {
+              "name": {
+                "value": "i need to make a decision"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
