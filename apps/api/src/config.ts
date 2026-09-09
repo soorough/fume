@@ -16,7 +16,7 @@ const envSchema = z.object({
   DEFAULT_PROVIDER: z.enum(['mock', 'deepseek', 'claude']).default('mock'),
   DEEPSEEK_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
-  ANTHROPIC_MODEL: z.string().default('claude-opus-5'),
+  ANTHROPIC_MODEL: z.string().default('claude-haiku-4-5'),
   DEEPSEEK_BASE_URL: z.string().default('https://api.deepseek.com'),
   DEEPSEEK_MODEL: z.string().default('deepseek-chat'),
   LWA_PROFILE_URL: z.string().default('https://api.amazon.com/user/profile'),

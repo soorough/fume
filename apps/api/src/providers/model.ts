@@ -93,10 +93,9 @@ export class ClaudeProvider implements ModelProvider {
 
     const response = await this.client.messages.create({
       model: env.ANTHROPIC_MODEL,
-      max_tokens: 1000,
-      // Low effort keeps the turn inside Alexa's window while staying on the
-      // stronger model; the persona already caps replies at a few sentences.
-      output_config: { effort: 'low' },
+      // A spoken reply is a few sentences; a high ceiling only buys a longer
+      // worst case, and the worst case is what breaks the Alexa turn.
+      max_tokens: 300,
       ...(system ? { system } : {}),
       messages: turns,
     });
