@@ -45,10 +45,13 @@ function linkAccountCard(input) {
     .getResponse();
 }
 
+// No reprompt on purpose. Alexa speaks the reprompt at the user after ~8s of
+// silence, which reads as nagging in a companion. Without one the mic simply
+// closes quietly and the backend keeps the conversation, so the next "open"
+// picks the thread back up.
 function openSession(input, text) {
   return input.responseBuilder
     .speak(text)
-    .reprompt('Go on. I am listening.')
     .withShouldEndSession(false)
     .getResponse();
 }
