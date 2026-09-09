@@ -29,6 +29,9 @@ const envSchema = z.object({
   OAUTH_CLIENT_ID: z.string().default('fume-skill'),
   OAUTH_CLIENT_SECRET: z.string().default('fume-skill-secret-change-me'),
   OAUTH_OWNER: z.string().default('fume-owner'),
+  // Shared with the skill Lambda. When set, the forwarded Alexa user id is
+  // only trusted if it carries a valid signature.
+  SKILL_SHARED_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

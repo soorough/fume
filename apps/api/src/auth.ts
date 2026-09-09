@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import { env } from './config';
@@ -59,11 +60,34 @@ function looksLikeOwnToken(token: string): boolean {
   }
 }
 
+// Signatures older than this are refused, so a captured header cannot be
+// replayed indefinitely.
+const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000;
+
+function signatureValid(userId: string, req: FastifyRequest): boolean {
+  const secret = env.SKILL_SHARED_SECRET;
+  if (!secret) return true; // not configured: unsigned ids are accepted
+  const ts = req.headers['x-fume-ts'];
+  const sig = req.headers['x-fume-sig'];
+  if (typeof ts !== 'string' || typeof sig !== 'string') return false;
+  const age = Date.now() - Number(ts);
+  if (!Number.isFinite(age) || age < -SIGNATURE_MAX_AGE_MS || age > SIGNATURE_MAX_AGE_MS) {
+    return false;
+  }
+  const expected = createHmac('sha256', secret)
+    .update(`${userId}.${ts}`)
+    .digest('hex');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 function alexaUserId(req: FastifyRequest): string | undefined {
   const id = req.headers['x-fume-alexa-user-id'];
-  return typeof id === 'string' && id.startsWith('amzn1.ask.account.')
-    ? id
-    : undefined;
+  if (typeof id !== 'string' || !id.startsWith('amzn1.ask.account.')) {
+    return undefined;
+  }
+  return signatureValid(id, req) ? id : undefined;
 }
 
 export async function authenticate(req: FastifyRequest): Promise<string> {

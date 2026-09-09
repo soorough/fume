@@ -1,4 +1,5 @@
 import Alexa from 'ask-sdk-core';
+import { createHmac } from 'node:crypto';
 
 // Alexa abandons the skill response at roughly 8s. Waiting 12s guaranteed
 // the user heard nothing at all on a slow turn; failing at 6s leaves room to
@@ -7,6 +8,18 @@ const REQUEST_TIMEOUT_MS = 6000;
 
 function fumeApiUrl() {
   return (process.env.FUME_API_URL || '').replace(/\/$/, '');
+}
+
+// Proves to the API that the Alexa user id on this request really came from
+// the skill. Without it the id is just a header any holder of an access token
+// could set to somebody else's id. Read lazily so local smoke tests still run
+// with no secret configured.
+function signUserId(userId) {
+  const secret = process.env.SKILL_SHARED_SECRET || '';
+  if (!secret || !userId) return undefined;
+  const ts = Date.now().toString();
+  const sig = createHmac('sha256', secret).update(`${userId}.${ts}`).digest('hex');
+  return { ts, sig };
 }
 
 function accessTokenOf(input) {
@@ -22,12 +35,14 @@ function alexaUserIdOf(input) {
 async function fumeApi(path, token, body, alexaUserId) {
   const API_URL = fumeApiUrl();
   if (!API_URL) throw new Error('FUME_API_URL is not set on the lambda');
+  const signed = signUserId(alexaUserId);
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${token}`,
       ...(alexaUserId ? { 'x-fume-alexa-user-id': alexaUserId } : {}),
+      ...(signed ? { 'x-fume-ts': signed.ts, 'x-fume-sig': signed.sig } : {}),
     },
     body: body ? JSON.stringify(body) : '{}',
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
