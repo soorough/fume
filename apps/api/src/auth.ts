@@ -57,7 +57,11 @@ export async function authenticate(req: FastifyRequest): Promise<string> {
     }
   }
   const devKey = req.headers['x-fume-dev-key'];
-  if (typeof devKey === 'string' && devKey === env.DEV_AUTH_KEY) {
+  if (
+    env.NODE_ENV !== 'production' &&
+    typeof devKey === 'string' &&
+    devKey === env.DEV_AUTH_KEY
+  ) {
     return upsertUser('dev-user');
   }
   throw new Error('unauthorized');
