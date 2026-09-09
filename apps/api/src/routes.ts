@@ -75,6 +75,17 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     ) {
       return reply.status(401).send({ error: 'invalid_client' });
     }
+    // Alexa calls this again with grant_type=refresh_token when the access
+    // token nears expiry. Rejecting it is what made the link die every hour.
+    if (body.grant_type === 'refresh_token') {
+      const claims = body.refresh_token
+        ? oauth.verifyToken(body.refresh_token, 'refresh')
+        : null;
+      if (!claims) {
+        return reply.status(400).send({ error: 'invalid_grant' });
+      }
+      return reply.send(oauth.issueToken(claims.sub));
+    }
     if (body.grant_type !== 'authorization_code') {
       return reply.status(400).send({ error: 'unsupported_grant_type' });
     }

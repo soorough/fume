@@ -43,13 +43,25 @@ async function upsertUser(amazonUserId: string): Promise<string> {
   return row.id;
 }
 
+// Alexa sends a stable, unique-per-skill id for the speaking user on every
+// request. Our own OAuth cannot tell users apart — /auth/authorize never learns
+// who is linking, so every token it mints carries the same subject — which meant
+// every linked user shared one memory store. Prefer Alexa's id when the skill
+// forwards it, and fall back to the token subject only when it is absent.
+function alexaUserId(req: FastifyRequest): string | undefined {
+  const id = req.headers['x-fume-alexa-user-id'];
+  return typeof id === 'string' && id.startsWith('amzn1.ask.account.')
+    ? id
+    : undefined;
+}
+
 export async function authenticate(req: FastifyRequest): Promise<string> {
   const header = req.headers.authorization ?? '';
   if (header.startsWith('Bearer ')) {
     const token = header.slice(7).trim();
     if (token) {
       const jwt = verifyToken(token);
-      if (jwt) return upsertUser(jwt.sub);
+      if (jwt) return upsertUser(alexaUserId(req) ?? jwt.sub);
       if (env.NODE_ENV !== 'production' && token === env.DEV_AUTH_KEY) {
         return upsertUser('dev-user');
       }

@@ -13,7 +13,13 @@ function accessTokenOf(input) {
   return input.context?.System?.user?.accessToken ?? '';
 }
 
-async function fumeApi(path, token, body) {
+// Stable and unique per user per skill. The API uses this as the identity,
+// because the OAuth subject is the same constant for everyone who links.
+function alexaUserIdOf(input) {
+  return input.context?.System?.user?.userId ?? '';
+}
+
+async function fumeApi(path, token, body, alexaUserId) {
   const API_URL = fumeApiUrl();
   if (!API_URL) throw new Error('FUME_API_URL is not set on the lambda');
   const res = await fetch(`${API_URL}${path}`, {
@@ -21,6 +27,7 @@ async function fumeApi(path, token, body) {
     headers: {
       'content-type': 'application/json',
       authorization: `Bearer ${token}`,
+      ...(alexaUserId ? { 'x-fume-alexa-user-id': alexaUserId } : {}),
     },
     body: body ? JSON.stringify(body) : '{}',
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -68,7 +75,7 @@ const LaunchRequestHandler = {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (!token) return linkAccountCard(handlerInput);
     try {
-      const data = await fumeApi('/v1/open', token);
+      const data = await fumeApi('/v1/open', token, undefined, alexaUserIdOf(handlerInput.requestEnvelope));
       return openSession(handlerInput, data.text);
     } catch (e) {
       console.error('open failed', e);
@@ -93,7 +100,7 @@ const ChatIntentHandler = {
       return openSession(handlerInput, "Sorry, I didn't catch that. Say it again?");
     }
     try {
-      const data = await fumeApi('/v1/respond', token, { utterance });
+      const data = await fumeApi('/v1/respond', token, { utterance }, alexaUserIdOf(input));
       return openSession(handlerInput, data.text);
     } catch (e) {
       console.error('respond failed', e);
@@ -128,7 +135,7 @@ const RememberIntentHandler = {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (!token) return linkAccountCard(handlerInput);
     try {
-      await fumeApi('/v1/memory/pin', token);
+      await fumeApi('/v1/memory/pin', token, undefined, alexaUserIdOf(handlerInput.requestEnvelope));
       return openSession(handlerInput, 'Got it. I will remember that.');
     } catch (e) {
       console.error('pin failed', e);
@@ -147,7 +154,7 @@ const ForgetIntentHandler = {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (!token) return linkAccountCard(handlerInput);
     try {
-      const data = await fumeApi('/v1/memory/forget', token, { target });
+      const data = await fumeApi('/v1/memory/forget', token, { target }, alexaUserIdOf(handlerInput.requestEnvelope));
       const n = data.suppressed ?? 0;
       return openSession(
         handlerInput,
@@ -170,7 +177,7 @@ const RecallIntentHandler = {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (!token) return linkAccountCard(handlerInput);
     try {
-      const data = await fumeApi('/v1/memory/recall', token);
+      const data = await fumeApi('/v1/memory/recall', token, undefined, alexaUserIdOf(handlerInput.requestEnvelope));
       const memories = data.memories ?? [];
       if (!memories.length) {
         return openSession(handlerInput, 'I don\'t have much stored about you yet.');
@@ -207,7 +214,7 @@ const EndSessionHandler = {
   async handle(handlerInput) {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (token) {
-      await fumeApi('/v1/close', token).catch(() => undefined);
+      await fumeApi('/v1/close', token, undefined, alexaUserIdOf(handlerInput.requestEnvelope)).catch(() => undefined);
     }
     return endSession(handlerInput, 'Goodbye. I will be here when you come back.');
   },
@@ -220,7 +227,7 @@ const SessionEndedRequestHandler = {
   async handle(handlerInput) {
     const token = accessTokenOf(handlerInput.requestEnvelope);
     if (token) {
-      await fumeApi('/v1/close', token).catch(() => undefined);
+      await fumeApi('/v1/close', token, undefined, alexaUserIdOf(handlerInput.requestEnvelope)).catch(() => undefined);
     }
     return handlerInput.responseBuilder.getResponse();
   },

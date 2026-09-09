@@ -2,6 +2,10 @@ import { createHmac, randomBytes } from 'node:crypto';
 import { env } from './config';
 
 const TOKEN_TTL_SECONDS = 3600;
+// Alexa keeps the refresh token privately and exchanges it for a new access
+// token when the old one expires. Without one the link simply dies after an
+// hour and the user has to link again by hand.
+const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 365;
 const codes = new Map<string, { expiresAt: number }>();
 
 function b64u(data: Buffer | string): string {
@@ -17,16 +21,19 @@ function sign(payload: Record<string, unknown>): string {
   return `${header}.${body}.${sig}`;
 }
 
-export function verifyToken(token: string): { sub: string } | null {
+export function verifyToken(
+  token: string,
+  expected: 'access' | 'refresh' = 'access',
+): { sub: string } | null {
   const parts = token.split('.');
   if (parts.length !== 3) return null;
   const [header, body, sig] = parts;
-  const expected = createHmac('sha256', env.OAUTH_CLIENT_SECRET)
+  const expectedSig = createHmac('sha256', env.OAUTH_CLIENT_SECRET)
     .update(`${header}.${body}`)
     .digest('base64url');
-  if (!sig || sig.length !== expected.length) return null;
+  if (!sig || sig.length !== expectedSig.length) return null;
   const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
+  const b = Buffer.from(expectedSig);
   if (a.length !== b.length) return null;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
@@ -36,6 +43,10 @@ export function verifyToken(token: string): { sub: string } | null {
     if (typeof payload.exp !== 'number' || payload.exp < Date.now() / 1000) {
       return null;
     }
+    // A refresh token must never be accepted as a bearer credential, nor an
+    // access token spent as a refresh token.
+    const kind = payload.kind === 'refresh' ? 'refresh' : 'access';
+    if (kind !== expected) return null;
     return { sub: payload.sub };
   } catch {
     return null;
@@ -59,12 +70,25 @@ export function consumeCode(code: string): boolean {
   return true;
 }
 
-export function issueToken(sub: string): { access_token: string; token_type: string; expires_in: number } {
+export function issueToken(sub: string): {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+} {
+  const now = Math.floor(Date.now() / 1000);
   return {
     access_token: sign({
       sub,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS,
+      kind: 'access',
+      iat: now,
+      exp: now + TOKEN_TTL_SECONDS,
+    }),
+    refresh_token: sign({
+      sub,
+      kind: 'refresh',
+      iat: now,
+      exp: now + REFRESH_TTL_SECONDS,
     }),
     token_type: 'Bearer',
     expires_in: TOKEN_TTL_SECONDS,
