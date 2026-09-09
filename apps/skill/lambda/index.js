@@ -29,17 +29,17 @@ async function fumeApi(path, token, body) {
   return res.json();
 }
 
-function linkAccountCard() {
-  return {
-    response: {
-      card: { type: 'LinkAccount' },
-      shouldEndSession: true,
-      outputSpeech: {
-        type: 'PlainText',
-        text: 'Fume needs your Amazon account linked first. Open the Alexa app, find Fume, and tap link account.',
-      },
-    },
-  };
+// Must go through responseBuilder. Returning a hand-built { response: {...} }
+// gets wrapped by the SDK into { response: { response: {...} } }, which Alexa
+// cannot read — the user hears silence instead of the link prompt.
+function linkAccountCard(input) {
+  return input.responseBuilder
+    .speak(
+      'Fume needs your Amazon account linked first. Open the Alexa app, find Fume, and tap link account.',
+    )
+    .withLinkAccountCard()
+    .withShouldEndSession(true)
+    .getResponse();
 }
 
 function openSession(input, text) {
@@ -60,7 +60,7 @@ const LaunchRequestHandler = {
   },
   async handle(handlerInput) {
     const token = accessTokenOf(handlerInput.requestEnvelope);
-    if (!token) return linkAccountCard();
+    if (!token) return linkAccountCard(handlerInput);
     try {
       const data = await fumeApi('/v1/open', token);
       return openSession(handlerInput, data.text);
@@ -82,7 +82,7 @@ const ChatIntentHandler = {
     const input = handlerInput.requestEnvelope;
     const utterance = input.request.intent.slots?.text?.value ?? '';
     const token = accessTokenOf(input);
-    if (!token) return linkAccountCard();
+    if (!token) return linkAccountCard(handlerInput);
     if (!utterance) {
       return openSession(handlerInput, "Sorry, I didn't catch that. Say it again?");
     }
@@ -120,7 +120,7 @@ const RememberIntentHandler = {
   },
   async handle(handlerInput) {
     const token = accessTokenOf(handlerInput.requestEnvelope);
-    if (!token) return linkAccountCard();
+    if (!token) return linkAccountCard(handlerInput);
     try {
       await fumeApi('/v1/memory/pin', token);
       return openSession(handlerInput, 'Got it. I will remember that.');
@@ -139,7 +139,7 @@ const ForgetIntentHandler = {
     const intent = handlerInput.requestEnvelope.request.intent;
     const target = intent.slots?.what?.value ?? undefined;
     const token = accessTokenOf(handlerInput.requestEnvelope);
-    if (!token) return linkAccountCard();
+    if (!token) return linkAccountCard(handlerInput);
     try {
       const data = await fumeApi('/v1/memory/forget', token, { target });
       const n = data.suppressed ?? 0;
@@ -162,7 +162,7 @@ const RecallIntentHandler = {
   },
   async handle(handlerInput) {
     const token = accessTokenOf(handlerInput.requestEnvelope);
-    if (!token) return linkAccountCard();
+    if (!token) return linkAccountCard(handlerInput);
     try {
       const data = await fumeApi('/v1/memory/recall', token);
       const memories = data.memories ?? [];
