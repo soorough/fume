@@ -71,17 +71,16 @@ const LaunchRequestHandler = {
   },
 };
 
-const FallbackIntentHandler = {
+// Open-ended speech arrives as ChatIntent, whose custom slot carries the raw
+// utterance. AMAZON.FallbackIntent cannot do this job: Alexa sends it with no
+// slots at all, so there is no way to recover what the user said from it.
+const ChatIntentHandler = {
   canHandle(handlerInput) {
-    return (
-      handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
-      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent'
-    );
+    return isIntent(handlerInput, 'ChatIntent');
   },
   async handle(handlerInput) {
     const input = handlerInput.requestEnvelope;
-    const intent = input.request.intent;
-    const utterance = intent.slots?.text?.value ?? '';
+    const utterance = input.request.intent.slots?.text?.value ?? '';
     const token = accessTokenOf(input);
     if (!token) return linkAccountCard();
     if (!utterance) {
@@ -94,6 +93,24 @@ const FallbackIntentHandler = {
       console.error('respond failed', e);
       return openSession(handlerInput, 'Sorry, something glitched. Try again?');
     }
+  },
+};
+
+const FallbackIntentHandler = {
+  canHandle(handlerInput) {
+    return isIntent(handlerInput, 'AMAZON.FallbackIntent');
+  },
+  handle(handlerInput) {
+    return openSession(handlerInput, "Sorry, I didn't catch that. Say it again?");
+  },
+};
+
+const NavigateHomeIntentHandler = {
+  canHandle(handlerInput) {
+    return isIntent(handlerInput, 'AMAZON.NavigateHomeIntent');
+  },
+  handle(handlerInput) {
+    return openSession(handlerInput, 'Still here. Go on.');
   },
 };
 
@@ -224,7 +241,9 @@ function isIntent(handlerInput, name) {
 export const handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
+    ChatIntentHandler,
     FallbackIntentHandler,
+    NavigateHomeIntentHandler,
     RememberIntentHandler,
     ForgetIntentHandler,
     RecallIntentHandler,
